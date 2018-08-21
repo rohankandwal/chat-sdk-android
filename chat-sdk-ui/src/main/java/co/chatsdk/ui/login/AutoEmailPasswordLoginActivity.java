@@ -14,10 +14,12 @@ import co.chatsdk.core.types.AccountDetails;
 import co.chatsdk.ui.R;
 import co.chatsdk.ui.main.BaseActivity;
 import co.chatsdk.ui.utils.Constants;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
+import timber.log.Timber;
 
 public class AutoEmailPasswordLoginActivity extends BaseActivity implements View.OnClickListener {
 
@@ -79,8 +81,8 @@ public class AutoEmailPasswordLoginActivity extends BaseActivity implements View
 			password = bundle.getString(Constants.PASSWORD, null);
 		} else {
 			contentViewId = -1;
-			emailId = null;
-			password = null;
+			emailId = "rohantest18@test.com";
+			password = "test@test.com";
 		}
 
 		if (TextUtils.isEmpty(emailId) || TextUtils.isEmpty(password)) {
@@ -121,16 +123,11 @@ public class AutoEmailPasswordLoginActivity extends BaseActivity implements View
 
 	public void toastErrorMessage(Throwable error, boolean login) {
 		String errorMessage = "";
-
-		if (StringUtils.isNotBlank(error.getMessage())) {
-			errorMessage = error.getMessage();
-		} else if (login) {
-			errorMessage = getString(R.string.login_activity_failed_to_login_toast);
-		} else {
-			errorMessage = getString(R.string.login_activity_failed_to_register_toast);
-		}
-
-		showToast(errorMessage);
+			if (error instanceof FirebaseAuthInvalidUserException) {
+				register();
+			}
+		Timber.d(errorMessage);
+		//showToast(errorMessage);
 	}
 
 	protected boolean isNetworkAvailable() {
@@ -161,7 +158,7 @@ public class AutoEmailPasswordLoginActivity extends BaseActivity implements View
 		details.type = AccountDetails.Type.Register;
 		details.username = emailId;
 		details.password = password;
-
+		authenticating  = false;
 		authenticateWithDetails(details);
 	}
 
